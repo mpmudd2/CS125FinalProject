@@ -5,12 +5,15 @@ import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.DragEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.SeekBar;
 
 import java.io.IOException;
 
@@ -19,12 +22,42 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "Main Menu";
     private static final int READ_REQUEST_CODE = 42;
     private Uri currentAudioURI = null;
+    SeekBar seekBar;
     MediaPlayer mediaPlayer = null;
+    Handler handler;
+    Runnable runnable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        handler = new Handler();
+
+
+        seekBar = findViewById(R.id.songProgressBar);
+
+
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                Log.d(TAG, "progress bar is changed");
+                if (mediaPlayer != null && fromUser) {
+                    mediaPlayer.seekTo(progress);
+                    Log.d(TAG, "progress bar is changed and seekTo is called");
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
 
         final Button openFile = findViewById(R.id.openFile);
         openFile.setOnClickListener(new View.OnClickListener() {
@@ -45,10 +78,27 @@ public class MainActivity extends AppCompatActivity {
                         mediaPlayer.pause();
                     } else {
                         mediaPlayer.start();
+                        playCycle();
                     }
                 }
             }
         });
+    }
+
+    public void playCycle() {
+        if (mediaPlayer != null) {
+            seekBar.setProgress(mediaPlayer.getCurrentPosition());
+
+            if (mediaPlayer.isPlaying()) {
+                runnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        playCycle();
+                    }
+                };
+                handler.postDelayed(runnable, 1000);
+            }
+        }
     }
     private void startOpenFile() {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
@@ -75,6 +125,10 @@ public class MainActivity extends AppCompatActivity {
                 mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                 mediaPlayer.setDataSource(getApplicationContext(), currentAudioURI);
                 mediaPlayer.prepare();
+                if (seekBar != null) {
+                    seekBar.setMax(mediaPlayer.getDuration());
+                }
+
             }
             catch (IOException ex) {
                 Log.wtf(TAG, "file does not exist");

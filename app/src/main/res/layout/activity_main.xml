@@ -23,6 +23,11 @@
             android:layout_height="wrap_content"
             android:visibility="visible"
             app:srcCompat="@android:drawable/ic_media_play" />
+
+        <SeekBar
+            android:id="@+id/songProgressBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
     </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>
