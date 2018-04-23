@@ -30,6 +30,37 @@
             android:layout_height="wrap_content"
             android:text="Upload" />
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/pitchLess"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_weight="0"
+                app:srcCompat="@android:drawable/button_onoff_indicator_on" />
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="220dp"
+                android:layout_height="50dp"
+                android:layout_weight="0"
+                android:text="Change Pitch"
+                android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+                android:visibility="visible"
+                android:textColor="#00FF00"/>
+
+            <ImageButton
+                android:id="@+id/pitchMore"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_weight="0"
+                app:srcCompat="@android:drawable/ic_input_add" />
+        </LinearLayout>
+
     </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>
