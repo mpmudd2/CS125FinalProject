@@ -231,9 +231,7 @@ public class MainActivity extends AppCompatActivity {
             Log.w(TAG, "Storing this Audio URI from the upload button");
             currentAudioURI = data.getData();
             try {
-                Log.d(TAG, convertedPath);
-                currentFile = new File(convertedPath);
-                Log.d(TAG, "" + Uri.fromFile(currentFile));
+              
                 mediaPlayer = new MediaPlayer();
                 mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                 mediaPlayer.setDataSource(getApplicationContext(), currentAudioURI);
