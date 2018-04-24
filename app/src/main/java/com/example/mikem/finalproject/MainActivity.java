@@ -48,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
     Handler handler;
     Runnable runnable;
     File currentFile;
+    File c2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(final View v) {
                 Log.d(TAG, "Less Pitch button clicked");
                 if (currentFile != null) {
-                    Log.d(TAG, "currentFile does exist: " + Uri.fromFile(currentFile));
+                    Log.d(TAG, "currentFile object does exist: " + Uri.fromFile(currentFile));
                     try {
                         start().withFile(currentFile).convertIntoSound().apply(new PitchSoundTransform(75)).exportToFile(currentFile);
                     } catch (SoundTransformException e) {
@@ -199,8 +200,8 @@ public class MainActivity extends AppCompatActivity {
             Log.w(TAG, "Storing this Audio URI from the upload button");
             currentAudioURI = data.getData();
             try {
-
-                Log.d(TAG, "Uri produced from file: " + Uri.fromFile(currentFile));
+                currentFile = new File(currentAudioURI.toString());
+                Log.d(TAG, currentAudioURI.toString());
                 mediaPlayer = new MediaPlayer();
                 mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                 mediaPlayer.setDataSource(getApplicationContext(), currentAudioURI);
@@ -219,6 +220,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         Log.d(TAG, "Audio selection produced URI " + currentAudioURI);
+
     }
 
     public void convertToWav() {
@@ -246,34 +248,4 @@ public class MainActivity extends AppCompatActivity {
                             .convert();
     }
 
-    private void copyInputStreamToFile(InputStream in, File file) {
-        OutputStream out = null;
-
-        try {
-            out = new FileOutputStream(file);
-            byte[] buf = new byte[1024];
-            int len;
-            while((len=in.read(buf))>0){
-                out.write(buf,0,len);
-            }
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-        finally {
-            // Ensure that the InputStreams are closed even if there's an exception.
-            try {
-                if ( out != null ) {
-                    out.close();
-                }
-
-                // If you want to close the "in" InputStream yourself then remove this
-                // from here but ensure that you close it yourself eventually.
-                in.close();
-            }
-            catch ( IOException e ) {
-                e.printStackTrace();
-            }
-        }
-    }
 }
