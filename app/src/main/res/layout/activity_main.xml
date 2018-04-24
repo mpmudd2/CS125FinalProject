@@ -41,10 +41,11 @@
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:layout_weight="0"
-                app:srcCompat="@drawable/nathanDank" />
+                android:visibility="visible"
+                app:srcCompat="@drawable/dankmemes" />
 
             <Button
-                android:id="@+id/8BitButton"
+                android:id="@+id/bitButton"
                 android:layout_width="wrap_content"
                 android:layout_height="50dp"
                 android:layout_weight="0"
@@ -55,7 +56,8 @@
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:layout_weight="0"
-                app:srcCompat="@drawable/nathanDank" />
+                android:visibility="visible"
+                app:srcCompat="@drawable/dankmemes" />
         </LinearLayout>
 
         <LinearLayout
@@ -89,6 +91,12 @@
                 app:srcCompat="@android:drawable/ic_input_add" />
 
         </LinearLayout>
+
+        <Button
+            android:id="@+id/saveButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Save File" />
 
     </LinearLayout>
 

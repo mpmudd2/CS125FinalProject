@@ -22,7 +22,10 @@ import org.toilelibre.libe.soundtransform.model.exception.SoundTransformExceptio
 
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -87,6 +90,22 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        final Button bitify = findViewById(R.id.bitButton);
+        bitify.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(final View v) {
+                Log.d(TAG, "8-bititfy button clicked");
+            }
+        });
+
+        final Button save = findViewById(R.id.saveButton);
+        save.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(final View v) {
+                Log.d(TAG, "save button clicked");
+            }
+        });
+
         final ImageButton lessPitch = findViewById(R.id.pitchLess);
         lessPitch.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -116,6 +135,14 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
 
+            }
+        });
+
+        final ImageButton morePitch = findViewById(R.id.pitchMore);
+        morePitch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(final View v) {
+                Log.d(TAG, "more pitch button clicked");
             }
         });
 
@@ -172,7 +199,7 @@ public class MainActivity extends AppCompatActivity {
             Log.w(TAG, "Storing this Audio URI from the upload button");
             currentAudioURI = data.getData();
             try {
-                currentFile = new File(Environment.getExternalStorageDirectory().getPath() + currentAudioURI.getPath());
+
                 Log.d(TAG, "Uri produced from file: " + Uri.fromFile(currentFile));
                 mediaPlayer = new MediaPlayer();
                 mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
@@ -217,5 +244,36 @@ public class MainActivity extends AppCompatActivity {
 
                             // Start conversion
                             .convert();
+    }
+
+    private void copyInputStreamToFile(InputStream in, File file) {
+        OutputStream out = null;
+
+        try {
+            out = new FileOutputStream(file);
+            byte[] buf = new byte[1024];
+            int len;
+            while((len=in.read(buf))>0){
+                out.write(buf,0,len);
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        finally {
+            // Ensure that the InputStreams are closed even if there's an exception.
+            try {
+                if ( out != null ) {
+                    out.close();
+                }
+
+                // If you want to close the "in" InputStream yourself then remove this
+                // from here but ensure that you close it yourself eventually.
+                in.close();
+            }
+            catch ( IOException e ) {
+                e.printStackTrace();
+            }
+        }
     }
 }
