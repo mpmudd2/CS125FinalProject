@@ -1,15 +1,43 @@
 package com.example.mikem.finalproject;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.content.Context;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.IntentSender;
+import android.content.ServiceConnection;
+import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.content.res.AssetManager;
+import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.database.Cursor;
+import android.database.DatabaseErrorHandler;
+import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Looper;
+import android.os.UserHandle;
+import android.provider.DocumentsContract;
+import android.provider.MediaStore;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Display;
 import android.view.DragEvent;
 import android.view.View;
 import android.widget.Button;
@@ -22,6 +50,8 @@ import org.toilelibre.libe.soundtransform.model.exception.SoundTransformExceptio
 
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,12 +73,13 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "Main Menu";
     private static final int READ_REQUEST_CODE = 42;
     private Uri currentAudioURI = null;
+    private String convertedPath = "";
     SeekBar seekBar;
     MediaPlayer mediaPlayer = null;
     Handler handler;
     Runnable runnable;
     File currentFile;
-    File c2;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -200,8 +231,9 @@ public class MainActivity extends AppCompatActivity {
             Log.w(TAG, "Storing this Audio URI from the upload button");
             currentAudioURI = data.getData();
             try {
-                currentFile = new File(currentAudioURI.toString());
-                Log.d(TAG, currentAudioURI.toString());
+                Log.d(TAG, convertedPath);
+                currentFile = new File(convertedPath);
+                Log.d(TAG, "" + Uri.fromFile(currentFile));
                 mediaPlayer = new MediaPlayer();
                 mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                 mediaPlayer.setDataSource(getApplicationContext(), currentAudioURI);
@@ -247,5 +279,7 @@ public class MainActivity extends AppCompatActivity {
                             // Start conversion
                             .convert();
     }
+
+
 
 }
