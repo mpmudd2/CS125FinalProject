@@ -81,8 +81,7 @@ public class MainActivity extends AppCompatActivity {
     Handler handler;
     Runnable runnable;
     Uri currentAudioURI = null;
-    File audioPath = new File(Environment.getExternalStorageDirectory()+File.separator+"audio");
-    File currentFile = new File(audioPath, "temp.wav");
+    File currentFile;
 
 
 
@@ -236,8 +235,9 @@ public class MainActivity extends AppCompatActivity {
             Log.w(TAG, "Storing this Audio URI from the upload button");
             currentAudioURI = data.getData();
             try {
-                audioPath.mkdir();
-                copyInputStreamToFile(getContentResolver().openInputStream(currentAudioURI), currentFile);
+                if (MainActivity.this.getApplicationContext() != null) {
+                    currentFile = new File(getRealPathFromURI(MainActivity.this.getApplicationContext(), currentAudioURI));
+                }
                 convertToWav();
                 mediaPlayer = new MediaPlayer();
                 mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
@@ -285,34 +285,17 @@ public class MainActivity extends AppCompatActivity {
                             .convert();
     }
 
-
-    private void copyInputStreamToFile(InputStream in, File file) {
-        OutputStream out = null;
-
+    public String getRealPathFromURI(Context context, Uri contentUri) {
+        Cursor cursor = null;
         try {
-            out = new FileOutputStream(file);
-            byte[] buf = new byte[1024];
-            int len;
-            while((len=in.read(buf))>0){
-                out.write(buf,0,len);
-            }
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-        finally {
-            // Ensure that the InputStreams are closed even if there's an exception.
-            try {
-                if ( out != null ) {
-                    out.close();
-                }
-
-                // If you want to close the "in" InputStream yourself then remove this
-                // from here but ensure that you close it yourself eventually.
-                in.close();
-            }
-            catch ( IOException e ) {
-                e.printStackTrace();
+            String[] proj = { MediaStore.Audio.Media.DATA };
+            cursor = context.getContentResolver().query(contentUri,  proj, null, null, null);
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
             }
         }
     }
