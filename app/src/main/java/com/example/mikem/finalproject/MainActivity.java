@@ -34,6 +34,8 @@ import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ShareCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -47,6 +49,7 @@ import android.widget.SeekBar;
 import org.toilelibre.libe.soundtransform.actions.fluent.FluentClient;
 import org.toilelibre.libe.soundtransform.model.converted.sound.transform.PitchSoundTransform;
 import org.toilelibre.libe.soundtransform.model.exception.SoundTransformException;
+import org.toilelibre.libe.soundtransform.model.inputstream.AudioFileHelper;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -72,13 +75,15 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "Main Menu";
     private static final int READ_REQUEST_CODE = 42;
-    private Uri currentAudioURI = null;
     private String convertedPath = "";
     SeekBar seekBar;
     MediaPlayer mediaPlayer = null;
     Handler handler;
     Runnable runnable;
-    File currentFile;
+    Uri currentAudioURI = null;
+    File audioPath = new File(Environment.getExternalStorageDirectory()+File.separator+"audio");
+    File currentFile = new File(audioPath, "temp.wav");
+
 
 
     @Override
@@ -231,7 +236,9 @@ public class MainActivity extends AppCompatActivity {
             Log.w(TAG, "Storing this Audio URI from the upload button");
             currentAudioURI = data.getData();
             try {
-              
+                audioPath.mkdir();
+                copyInputStreamToFile(getContentResolver().openInputStream(currentAudioURI), currentFile);
+                convertToWav();
                 mediaPlayer = new MediaPlayer();
                 mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                 mediaPlayer.setDataSource(getApplicationContext(), currentAudioURI);
@@ -279,5 +286,34 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    private void copyInputStreamToFile(InputStream in, File file) {
+        OutputStream out = null;
 
+        try {
+            out = new FileOutputStream(file);
+            byte[] buf = new byte[1024];
+            int len;
+            while((len=in.read(buf))>0){
+                out.write(buf,0,len);
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        finally {
+            // Ensure that the InputStreams are closed even if there's an exception.
+            try {
+                if ( out != null ) {
+                    out.close();
+                }
+
+                // If you want to close the "in" InputStream yourself then remove this
+                // from here but ensure that you close it yourself eventually.
+                in.close();
+            }
+            catch ( IOException e ) {
+                e.printStackTrace();
+            }
+        }
+    }
 }
