@@ -26,12 +26,16 @@ android {
         }
     }
     repositories {
+        flatDir {
+            dirs 'libs'
+        }
 
         maven {
             url "https://jitpack.io"
         }
     }
     dependencies {
+        implementation(name:'FFmpegAndroid-0.3.2', ext:'aar')
         implementation fileTree(dir: 'libs', include: ['*.jar'])
         implementation 'com.android.support:appcompat-v7:27.1.1'
         implementation 'com.android.support.constraint:constraint-layout:1.1.0'
@@ -40,5 +44,6 @@ android {
         implementation 'org.toile-libre.libe:soundtransform:1.0.23'
         androidTestImplementation 'com.android.support.test:runner:1.0.1'
         androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+
     }
 }

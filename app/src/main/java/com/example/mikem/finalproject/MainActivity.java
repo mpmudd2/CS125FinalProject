@@ -63,6 +63,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.Date;
 
 import cafe.adriel.androidaudioconverter.AndroidAudioConverter;
 import cafe.adriel.androidaudioconverter.callback.IConvertCallback;
@@ -75,12 +76,12 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "Main Menu";
     private static final int READ_REQUEST_CODE = 42;
-    private String convertedPath = "";
     SeekBar seekBar;
     MediaPlayer mediaPlayer = null;
     Handler handler;
     Runnable runnable;
     Uri currentAudioURI = null;
+    File outputDir;
     File currentFile;
 
 
@@ -93,6 +94,19 @@ public class MainActivity extends AppCompatActivity {
 
 
         seekBar = findViewById(R.id.songProgressBar);
+        outputDir = getApplicationContext().getCacheDir();
+        AndroidAudioConverter.load(this, new ILoadCallback() {
+            @Override
+            public void onSuccess() {
+                // Great!
+                Log.d(TAG, "success loaded");
+            }
+            @Override
+            public void onFailure(Exception error) {
+                // FFmpeg is not supported by device
+                Log.d(TAG, error.toString());
+            }
+        });
 
 
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -157,17 +171,16 @@ public class MainActivity extends AppCompatActivity {
                 }
                 if (mediaPlayer != null) {
                     try {
-                        currentAudioURI = Uri.fromFile(currentFile);
                         mediaPlayer.release();
                         mediaPlayer = new MediaPlayer();
                         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                        mediaPlayer.setDataSource(getApplicationContext(), currentAudioURI);
+                        mediaPlayer.setDataSource(openFile(currentFile));
                         mediaPlayer.prepare();
                         seekBar.setMax(mediaPlayer.getDuration());
 
                     }
                     catch (IOException ex) {
-                        Log.wtf(TAG, "file does not exist");
+                        Log.wtf(TAG, "Failure to setDataSource");
                     }
                 }
 
@@ -235,9 +248,8 @@ public class MainActivity extends AppCompatActivity {
             Log.w(TAG, "Storing this Audio URI from the upload button");
             currentAudioURI = data.getData();
             try {
-                if (MainActivity.this.getApplicationContext() != null) {
-                    currentFile = new File(getRealPathFromURI(MainActivity.this.getApplicationContext(), currentAudioURI));
-                }
+                currentFile = File.createTempFile("prefix", "extension", outputDir);
+                convertToFile(getContentResolver().openInputStream(currentAudioURI), currentFile);
                 convertToWav();
                 mediaPlayer = new MediaPlayer();
                 mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
@@ -264,10 +276,14 @@ public class MainActivity extends AppCompatActivity {
         IConvertCallback callback = new IConvertCallback() {
             @Override
             public void onSuccess(File convertedFile) {
+                Log.d(TAG, convertedFile.getPath());
+                Log.d(TAG, currentFile.getPath());
+
                 // So fast? Love it!
             }
             @Override
             public void onFailure(Exception error) {
+                Log.d(TAG, error.toString());
                 // Oops! Something went wrong
             }
         };
@@ -285,18 +301,22 @@ public class MainActivity extends AppCompatActivity {
                             .convert();
     }
 
-    public String getRealPathFromURI(Context context, Uri contentUri) {
-        Cursor cursor = null;
+    public void convertToFile(InputStream stream, File target) {
         try {
-            String[] proj = { MediaStore.Audio.Media.DATA };
-            cursor = context.getContentResolver().query(contentUri,  proj, null, null, null);
-            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA);
-            cursor.moveToFirst();
-            return cursor.getString(column_index);
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            byte[] buffer = new byte[stream.available()];
+            stream.read(buffer);
+            OutputStream outStream = new FileOutputStream(target);
+            outStream.write(buffer);
+        } catch (IOException e) {
+            Log.d(TAG, "Problem with converting stream to byte[], reading, or writing");
         }
+    }
+
+    private FileDescriptor openFile(File file)
+            throws FileNotFoundException, IOException {
+        FileOutputStream fos = new FileOutputStream(file);
+        // remember th 'fos' reference somewhere for later closing it
+        fos.write((new Date() + " Beginning of process...").getBytes());
+        return fos.getFD();
     }
 }
