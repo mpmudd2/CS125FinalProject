@@ -91,7 +91,6 @@ public class MainActivity extends AppCompatActivity {
     Uri currentAudioURI = null;
     File outputDir;
     File currentFile;
-    File newFile;
 
 
 
@@ -102,19 +101,7 @@ public class MainActivity extends AppCompatActivity {
         handler = new Handler();
 
         seekBar = findViewById(R.id.songProgressBar);
-        AndroidAudioConverter.load(this, new ILoadCallback() {
-            @Override
-            public void onSuccess() {
-                // Great!
-                Log.d(TAG, "success loaded");
-            }
-            @Override
-            public void onFailure(Exception error) {
-                // FFmpeg is not supported by device
-                Log.d(TAG, error.toString());
-                Log.d(TAG, "not supported");
-            }
-        });
+
 
 
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -153,31 +140,37 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(final View v) {
                 Log.d(TAG, "bitify button clicked");
-                if (currentFile != null) {
-                    Log.d(TAG, "currentFile object does exist: " + Uri.fromFile(currentFile));
+                if (currentAudioURI != null) {
                     try {
-                        newFile = File.createTempFile("prefix", "extension", outputDir);
-                        start().withFile(currentFile).convertIntoSound().apply(new EightBitsSoundTransform(25)).exportToFile(newFile);
-                        currentFile.delete();
-                    } catch (Exception e) {
-                        Log.d(TAG, "bitify passed a sound transform exception");
-                    }
-                }
-                if (mediaPlayer != null) {
-                    try {
+                        if (mediaPlayer.isPlaying()) {
+                            mediaPlayer.pause();
+                        }
                         mediaPlayer.release();
-                        mediaPlayer = new MediaPlayer();
-                        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                        mediaPlayer.setDataSource(getApplicationContext(), Uri.fromFile(newFile));
-                        mediaPlayer.prepare();
-                        seekBar.setMax(mediaPlayer.getDuration());
+                        if (currentFile != null) {
+                            currentFile.delete();
+                        }
 
-                    }
-                    catch (IOException ex) {
-                        Log.wtf(TAG, "Failure to setDataSource");
-                        Log.d(TAG, currentFile.toString());
+                        outputDir = getApplicationContext().getCacheDir();
+                        currentFile = File.createTempFile("prefix", "extension", outputDir);
+                        start().withAudioInputStream(getContentResolver().openInputStream(currentAudioURI)).importToSound().apply(new EightBitsSoundTransform(25)).exportToFile(currentFile);
+                        currentAudioURI = Uri.fromFile(currentFile);
+                    } catch (Exception e) {
+                        Log.d(TAG, "Bitify passed a sound transform exception");
                     }
                 }
+                try {
+                    mediaPlayer = new MediaPlayer();
+                    mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                    mediaPlayer.setDataSource(getApplicationContext(), currentAudioURI);
+                    mediaPlayer.prepare();
+                    seekBar.setMax(mediaPlayer.getDuration());
+
+                }
+                catch (IOException ex) {
+                    Log.wtf(TAG, "Failure to setDataSource");
+                    Log.d(TAG, currentFile.toString());
+                }
+
             }
         });
 
@@ -194,30 +187,37 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(final View v) {
                 Log.d(TAG, "Less Pitch button clicked");
-                if (currentFile != null) {
-                    Log.d(TAG, "currentFile object does exist: " + Uri.fromFile(currentFile));
+                if (currentAudioURI != null) {
                     try {
-                        newFile = File.createTempFile("prefix", "extension", outputDir);
-                        start().withFile(currentFile).convertIntoSound().apply(new PitchSoundTransform(95)).exportToFile(newFile);
-                        currentFile.delete();
+                        if (mediaPlayer.isPlaying()) {
+                            mediaPlayer.pause();
+                        }
+                        mediaPlayer.release();
+                        if (currentFile != null) {
+                            currentFile.delete();
+                        }
+
+                        outputDir = getApplicationContext().getCacheDir();
+                        currentFile = File.createTempFile("prefix", "extension", outputDir);
+                        start().withAudioInputStream(getContentResolver().openInputStream(currentAudioURI)).importToSound().apply(new PitchSoundTransform(95)).exportToFile(currentFile);
+                        currentAudioURI = Uri.fromFile(currentFile);
                     } catch (Exception e) {
                         Log.d(TAG, "Pitch less passed a sound transform exception");
                     }
                 }
-                if (mediaPlayer != null) {
-                    try {
-                        mediaPlayer.release();
-                        mediaPlayer = new MediaPlayer();
-                        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                        mediaPlayer.setDataSource(getApplicationContext(), Uri.fromFile(newFile));
-                        mediaPlayer.prepare();
-                        seekBar.setMax(mediaPlayer.getDuration());
+                try {
+                    mediaPlayer = new MediaPlayer();
+                    mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                    mediaPlayer.setDataSource(getApplicationContext(), currentAudioURI);
+                    mediaPlayer.prepare();
+                    seekBar.setMax(mediaPlayer.getDuration());
 
-                    } catch (IOException ex) {
-                        Log.wtf(TAG, "Failure to setDataSource");
-                        Log.d(TAG, currentFile.toString());
-                    }
                 }
+                catch (IOException ex) {
+                    Log.wtf(TAG, "Failure to setDataSource");
+                    Log.d(TAG, currentFile.toString());
+                }
+
             }
         });
 
@@ -226,22 +226,28 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(final View v) {
                 Log.d(TAG, "more pitch button clicked");
-                if (currentFile != null) {
-                    Log.d(TAG, "currentFile object does exist: " + Uri.fromFile(currentFile));
+                if (currentAudioURI != null) {
                     try {
-                        newFile = File.createTempFile("prefix", "extension", outputDir);
-                        start().withFile(currentFile).convertIntoSound().apply(new PitchSoundTransform(105)).exportToFile(newFile);
-                        currentFile.delete();
+                        if (mediaPlayer.isPlaying()) {
+                            mediaPlayer.pause();
+                        }
+                        mediaPlayer.release();
+                        if (currentFile != null) {
+                            currentFile.delete();
+                        }
+
+                        outputDir = getApplicationContext().getCacheDir();
+                        currentFile = File.createTempFile("prefix", "extension", outputDir);
+                        start().withAudioInputStream(getContentResolver().openInputStream(currentAudioURI)).importToSound().apply(new PitchSoundTransform(105)).exportToFile(currentFile);
+                        currentAudioURI = Uri.fromFile(currentFile);
                     } catch (Exception e) {
                         Log.d(TAG, "Pitch more passed a sound transform exception");
                     }
                 }
-                if (mediaPlayer != null) {
                     try {
-                        mediaPlayer.release();
                         mediaPlayer = new MediaPlayer();
                         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                        mediaPlayer.setDataSource(getApplicationContext(), Uri.fromFile(newFile));
+                        mediaPlayer.setDataSource(getApplicationContext(), currentAudioURI);
                         mediaPlayer.prepare();
                         seekBar.setMax(mediaPlayer.getDuration());
 
@@ -250,7 +256,7 @@ public class MainActivity extends AppCompatActivity {
                         Log.wtf(TAG, "Failure to setDataSource");
                         Log.d(TAG, currentFile.toString());
                     }
-                }
+
             }
         });
 
@@ -310,17 +316,10 @@ public class MainActivity extends AppCompatActivity {
             if (outputDir != null) {
                 outputDir.delete();
             }
-            if (newFile != null) {
-                newFile.delete();
-            }
+
             Log.w(TAG, "Storing this Audio URI from the upload button");
             currentAudioURI = data.getData();
             try {
-                outputDir = getApplicationContext().getCacheDir();
-                currentFile = File.createTempFile("prefix", "extension", outputDir);
-                Log.d(TAG, currentFile.getFreeSpace() + "");
-                convertToFile(getContentResolver().openInputStream(currentAudioURI), currentFile);
-                Log.d(TAG, currentFile.getFreeSpace() + "");
                 mediaPlayer = new MediaPlayer();
                 mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                 mediaPlayer.setDataSource(getApplicationContext(), currentAudioURI);
@@ -382,11 +381,4 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private FileDescriptor openFile(File file)
-            throws FileNotFoundException, IOException {
-        FileOutputStream fos = new FileOutputStream(file);
-        // remember th 'fos' reference somewhere for later closing it
-        fos.write((new Date() + " Beginning of process...").getBytes());
-        return fos.getFD();
-    }
 }
