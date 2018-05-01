@@ -53,9 +53,11 @@ import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedExceptio
 import org.toilelibre.libe.soundtransform.actions.fluent.FluentClient;
 import org.toilelibre.libe.soundtransform.actions.fluent.FluentClientSoundImported;
 import org.toilelibre.libe.soundtransform.actions.fluent.FluentClientWithFile;
+import org.toilelibre.libe.soundtransform.infrastructure.service.converted.sound.transforms.GaussianEqualizerSoundTransform;
 import org.toilelibre.libe.soundtransform.model.converted.sound.Sound;
 import org.toilelibre.libe.soundtransform.model.converted.sound.transform.EightBitsSoundTransform;
 import org.toilelibre.libe.soundtransform.model.converted.sound.transform.PitchSoundTransform;
+import org.toilelibre.libe.soundtransform.model.converted.sound.transform.SpeedUpSoundTransform;
 import org.toilelibre.libe.soundtransform.model.exception.SoundTransformException;
 import org.toilelibre.libe.soundtransform.model.inputstream.AudioFileHelper;
 
@@ -174,11 +176,42 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        final Button save = findViewById(R.id.saveButton);
-        save.setOnClickListener(new View.OnClickListener() {
+        final Button equilizer = findViewById(R.id.equilizer);
+        equilizer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
-                Log.d(TAG, "save button clicked");
+                Log.d(TAG, "speed up button clicked");
+                if (currentAudioURI != null) {
+                    try {
+                        if (mediaPlayer.isPlaying()) {
+                            mediaPlayer.pause();
+                        }
+                        mediaPlayer.release();
+                        if (currentFile != null) {
+                            currentFile.delete();
+                        }
+
+                        outputDir = getApplicationContext().getCacheDir();
+                        currentFile = File.createTempFile("prefix", "extension", outputDir);
+                        start().withAudioInputStream(getContentResolver().openInputStream(currentAudioURI)).importToSound().apply(new SpeedUpSoundTransform(25, 2)).exportToFile(currentFile);
+                        currentAudioURI = Uri.fromFile(currentFile);
+                    } catch (Exception e) {
+                        Log.d(TAG, "Speed up passed a sound transform exception");
+                    }
+                }
+                try {
+                    mediaPlayer = new MediaPlayer();
+                    mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                    mediaPlayer.setDataSource(getApplicationContext(), currentAudioURI);
+                    mediaPlayer.prepare();
+                    seekBar.setMax(mediaPlayer.getDuration());
+
+                }
+                catch (IOException ex) {
+                    Log.wtf(TAG, "Failure to setDataSource");
+                    Log.d(TAG, currentFile.toString());
+                }
+
             }
         });
 
@@ -199,7 +232,7 @@ public class MainActivity extends AppCompatActivity {
 
                         outputDir = getApplicationContext().getCacheDir();
                         currentFile = File.createTempFile("prefix", "extension", outputDir);
-                        start().withAudioInputStream(getContentResolver().openInputStream(currentAudioURI)).importToSound().apply(new PitchSoundTransform(95)).exportToFile(currentFile);
+                        start().withAudioInputStream(getContentResolver().openInputStream(currentAudioURI)).importToSound().apply(new PitchSoundTransform(80)).exportToFile(currentFile);
                         currentAudioURI = Uri.fromFile(currentFile);
                     } catch (Exception e) {
                         Log.d(TAG, "Pitch less passed a sound transform exception");
@@ -238,7 +271,7 @@ public class MainActivity extends AppCompatActivity {
 
                         outputDir = getApplicationContext().getCacheDir();
                         currentFile = File.createTempFile("prefix", "extension", outputDir);
-                        start().withAudioInputStream(getContentResolver().openInputStream(currentAudioURI)).importToSound().apply(new PitchSoundTransform(105)).exportToFile(currentFile);
+                        start().withAudioInputStream(getContentResolver().openInputStream(currentAudioURI)).importToSound().apply(new PitchSoundTransform(120)).exportToFile(currentFile);
                         currentAudioURI = Uri.fromFile(currentFile);
                     } catch (Exception e) {
                         Log.d(TAG, "Pitch more passed a sound transform exception");

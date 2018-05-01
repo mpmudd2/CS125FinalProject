@@ -10,7 +10,16 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="top|center"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="251dp">
+
+        <ImageView
+            android:id="@+id/imageView3"
+            android:layout_width="match_parent"
+            android:layout_height="228dp"
+            android:layout_weight="0"
+            app:srcCompat="@drawable/audiowave" />
 
         <ImageButton
             android:id="@+id/playButton"
@@ -75,10 +84,10 @@
 
             <TextView
                 android:id="@+id/textView"
-                android:layout_width="220dp"
+                android:layout_width="wrap_content"
                 android:layout_height="50dp"
                 android:layout_weight="0"
-                android:text="Change Pitch"
+                android:text="Speed"
                 android:textAppearance="@style/TextAppearance.AppCompat.Display1"
                 android:textColor="#000000"
                 android:visibility="visible" />
@@ -91,12 +100,6 @@
                 app:srcCompat="@android:drawable/ic_input_add" />
 
         </LinearLayout>
-
-        <Button
-            android:id="@+id/saveButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Save File" />
 
     </LinearLayout>
 
