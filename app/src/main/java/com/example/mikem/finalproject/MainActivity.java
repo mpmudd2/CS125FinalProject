@@ -176,45 +176,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        final Button equilizer = findViewById(R.id.equilizer);
-        equilizer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(final View v) {
-                Log.d(TAG, "speed up button clicked");
-                if (currentAudioURI != null) {
-                    try {
-                        if (mediaPlayer.isPlaying()) {
-                            mediaPlayer.pause();
-                        }
-                        mediaPlayer.release();
-                        if (currentFile != null) {
-                            currentFile.delete();
-                        }
-
-                        outputDir = getApplicationContext().getCacheDir();
-                        currentFile = File.createTempFile("prefix", "extension", outputDir);
-                        start().withAudioInputStream(getContentResolver().openInputStream(currentAudioURI)).importToSound().apply(new SpeedUpSoundTransform(25, 2)).exportToFile(currentFile);
-                        currentAudioURI = Uri.fromFile(currentFile);
-                    } catch (Exception e) {
-                        Log.d(TAG, "Speed up passed a sound transform exception");
-                    }
-                }
-                try {
-                    mediaPlayer = new MediaPlayer();
-                    mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                    mediaPlayer.setDataSource(getApplicationContext(), currentAudioURI);
-                    mediaPlayer.prepare();
-                    seekBar.setMax(mediaPlayer.getDuration());
-
-                }
-                catch (IOException ex) {
-                    Log.wtf(TAG, "Failure to setDataSource");
-                    Log.d(TAG, currentFile.toString());
-                }
-
-            }
-        });
-
         final ImageButton lessPitch = findViewById(R.id.pitchLess);
         lessPitch.setOnClickListener(new View.OnClickListener() {
             @Override
